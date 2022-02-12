@@ -1,0 +1,6 @@
+{
+  "dependencies": {
+    "firebase-admin": "^10.0.2",
+    "twitter-api-v2": "^1.10.3"
+  }
+}

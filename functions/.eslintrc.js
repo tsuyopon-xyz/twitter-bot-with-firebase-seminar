@@ -26,5 +26,8 @@ module.exports = {
     quotes: ['error', 'single'],
     'import/no-unresolved': 0,
     'object-curly-spacing': ['error', 'always'],
+
+    // eslint-disable-next-line quote-props
+    indent: ['error', 2],
   },
 };
