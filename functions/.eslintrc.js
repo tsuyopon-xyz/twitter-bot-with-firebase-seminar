@@ -29,5 +29,7 @@ module.exports = {
 
     // eslint-disable-next-line quote-props
     indent: ['error', 2],
+    'max-len': 0,
+    'require-jsdoc': 0,
   },
 };

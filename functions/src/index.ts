@@ -2,30 +2,16 @@ import * as functions from 'firebase-functions';
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { TwitterApi } from 'twitter-api-v2';
+import { OAuthCollection } from './db/oauth';
+import { getConfig } from './utils';
 
 initializeApp();
 const db = getFirestore();
-
-type Config = {
-  twitter: {
-    apiKey: string;
-    apiKeySecret: string;
-    bearerToken: string;
-    clientId: string;
-    clientSecret: string;
-    callbackUrl: string;
-    scope: string[];
-  };
-};
-
-type DocTypeForCodeVerifierAndState = {
-  codeVerifier: string;
-  state: string;
-};
+const oauthCollection = new OAuthCollection(db);
 
 export const twitterAuthRedirect = functions.https.onRequest(
-  async (request, response): Promise<void> => {
-    const { twitter } = functions.config() as Config;
+  async (_, response): Promise<void> => {
+    const { twitter } = getConfig();
     const { clientId, clientSecret, callbackUrl, scope } = twitter;
 
     const client = new TwitterApi({
@@ -40,7 +26,7 @@ export const twitterAuthRedirect = functions.https.onRequest(
 
     // ここで保存した値は、twitterAuthCallback関数内で、
     // accessToken, refreshTokenを取得するのに利用する
-    await db.doc('oauth/codeVerifierAndState').set({
+    await oauthCollection.setCodeVerifierAndState({
       codeVerifier,
       state,
     });
@@ -52,11 +38,8 @@ export const twitterAuthRedirect = functions.https.onRequest(
 export const twitterAuthCallback = functions.https.onRequest(
   async (request, response): Promise<void> => {
     const { state, code } = request.query as { state: string; code: string };
-    const snapshotOfCodeVerifierAndState = await db
-      .doc('oauth/codeVerifierAndState')
-      .get();
     const { codeVerifier, state: stateInFirestore } =
-      snapshotOfCodeVerifierAndState.data() as DocTypeForCodeVerifierAndState;
+      await oauthCollection.getCodeVerifierAndState();
 
     if (!codeVerifier || !state || !stateInFirestore || !code) {
       response.status(400).send('You denied the app.');
@@ -68,7 +51,7 @@ export const twitterAuthCallback = functions.https.onRequest(
     }
 
     // Obtain access token
-    const { twitter } = functions.config() as Config;
+    const { twitter } = getConfig();
     const { clientId, clientSecret, callbackUrl } = twitter;
     const client = new TwitterApi({ clientId, clientSecret });
 
@@ -79,9 +62,9 @@ export const twitterAuthCallback = functions.https.onRequest(
         redirectUri: callbackUrl,
       });
 
-      db.doc('oauth/accessTokenAndRefreshToken').set({
+      await oauthCollection.setAccessTokenAndRefreshToken({
         accessToken,
-        refreshToken,
+        refreshToken: refreshToken as string,
       });
 
       response.send('OK');
