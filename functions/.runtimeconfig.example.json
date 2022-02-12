@@ -1,0 +1,8 @@
+{
+  "twitter": {
+    "clientId": "YOUR_CLIENT_ID",
+    "clientSecret": "YOUR_CLIENT_SECRET",
+    "callbackUrl": "http://localhost:5001/{your-project-name}/{region}/{function-name}",
+    "scope": ["tweet.read", "tweet.write", "users.read", "offline.access"]
+  }
+}
