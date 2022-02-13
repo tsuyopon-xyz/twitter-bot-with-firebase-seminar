@@ -2,12 +2,13 @@ import * as functions from 'firebase-functions';
 import { initializeApp } from 'firebase-admin/app';
 import { getFirestore } from 'firebase-admin/firestore';
 import { TwitterApi } from 'twitter-api-v2';
-import { OAuthCollection } from './db/oauth';
+import { OAuthCollection, TweetsCollection } from './db';
 import { getConfig } from './utils';
 
 initializeApp();
 const db = getFirestore();
 const oauthCollection = new OAuthCollection(db);
+const tweetsCollection = new TweetsCollection(db);
 
 export const twitterAuthRedirect = functions.https.onRequest(
   async (_, response): Promise<void> => {
@@ -91,13 +92,13 @@ export const tweet = functions.https.onRequest(
       await oauthCollection.setAccessTokenAndRefreshToken({
         refreshToken: newRefreshToken,
       });
-      const { data: createdTweet } = await refreshedClient.v2.tweet(
-        'test : ' + Date.now()
-      );
+      const tweetText = await tweetsCollection.getRandomText();
+
+      const { data: createdTweet } = await refreshedClient.v2.tweet(tweetText);
       response.json(createdTweet);
     } catch (error) {
       console.log('error', error);
-      response.status(403).json(error);
+      response.status(403).send(JSON.stringify(error));
     }
   }
 );

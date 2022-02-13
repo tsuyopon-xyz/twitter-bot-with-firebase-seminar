@@ -18,3 +18,7 @@ export type DocTypeForCodeVerifierAndState = {
 export type DocTypeForRefreshToken = {
   refreshToken?: string;
 };
+
+export type DocTypeForTweetsData = {
+  texts: string[];
+};
