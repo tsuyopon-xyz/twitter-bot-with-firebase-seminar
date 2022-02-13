@@ -1,11 +1,9 @@
+/* eslint-disable camelcase */
 export type Config = {
   twitter: {
-    apiKey: string;
-    apiKeySecret: string;
-    bearerToken: string;
-    clientId: string;
-    clientSecret: string;
-    callbackUrl: string;
+    client_id: string;
+    client_secret: string;
+    callback_url: string;
     scope: string[];
   };
 };

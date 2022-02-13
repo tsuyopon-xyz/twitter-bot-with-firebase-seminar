@@ -1,12 +1,23 @@
+/* eslint-disable camelcase */
+import * as path from 'path';
 import * as functions from 'firebase-functions';
-import { initializeApp } from 'firebase-admin/app';
-import { getFirestore } from 'firebase-admin/firestore';
+import * as admin from 'firebase-admin';
 import { TwitterApi } from 'twitter-api-v2';
 import { OAuthCollection, TweetsCollection } from './db';
 import { getConfig } from './utils';
 
-initializeApp();
-const db = getFirestore();
+const serviceAccountPath = path.resolve(
+  __dirname,
+  '../service-account-file.json'
+);
+
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const serviceAccount = require(serviceAccountPath);
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
+});
+
+const db = admin.firestore();
 const oauthCollection = new OAuthCollection(db);
 const tweetsCollection = new TweetsCollection(db);
 
@@ -21,20 +32,20 @@ export const twitterAuthRedirect = functions.https.onRequest(
     }
 
     const { twitter } = getConfig();
-    const { clientId, clientSecret, callbackUrl, scope } = twitter;
+    const { client_id, client_secret, callback_url, scope } = twitter;
 
     const client = new TwitterApi({
-      clientId,
-      clientSecret,
+      clientId: client_id,
+      clientSecret: client_secret,
     });
 
     const { url, codeVerifier, state } = client.generateOAuth2AuthLink(
-      callbackUrl,
+      callback_url,
       { scope }
     );
 
     // ここで保存した値は、twitterAuthCallback関数内で、
-    // accessToken, refreshTokenを取得するのに利用する
+    // refreshTokenを取得するのに利用する
     await oauthCollection.setCodeVerifierAndState({
       codeVerifier,
       state,
@@ -67,19 +78,21 @@ export const twitterAuthCallback = functions.https.onRequest(
       return;
     }
 
-    // Obtain access token
     const { twitter } = getConfig();
-    const { clientId, clientSecret, callbackUrl } = twitter;
-    const client = new TwitterApi({ clientId, clientSecret });
+    const { client_id, client_secret, callback_url } = twitter;
+    const client = new TwitterApi({
+      clientId: client_id,
+      clientSecret: client_secret,
+    });
 
     try {
       const { refreshToken } = await client.loginWithOAuth2({
         code,
         codeVerifier,
-        redirectUri: callbackUrl,
+        redirectUri: callback_url,
       });
 
-      await oauthCollection.setAccessTokenAndRefreshToken({
+      await oauthCollection.setRefreshToken({
         refreshToken,
       });
 
@@ -90,31 +103,38 @@ export const twitterAuthCallback = functions.https.onRequest(
   }
 );
 
-export const tweet = functions.https.onRequest(
-  async (_, response): Promise<void> => {
+export const tweet = functions
+  .region('asia-northeast1')
+  .pubsub.schedule('* * * * *')
+  .timeZone('Asia/Tokyo')
+  .onRun(async () => {
+    functions.logger.log('Calld tweet!');
     const { twitter } = getConfig();
-    const { clientId, clientSecret } = twitter;
-    const client = new TwitterApi({ clientId, clientSecret });
+    const { client_id, client_secret } = twitter;
+    const client = new TwitterApi({
+      clientId: client_id,
+      clientSecret: client_secret,
+    });
 
     try {
-      const { refreshToken } =
-        await oauthCollection.getAccessTokenAndRefreshToken();
+      const { refreshToken } = await oauthCollection.getRefreshToken();
       if (!refreshToken) {
         throw new Error('No refreshToken found.');
       }
 
       const { client: refreshedClient, refreshToken: newRefreshToken } =
         await client.refreshOAuth2Token(refreshToken);
-      await oauthCollection.setAccessTokenAndRefreshToken({
+      await oauthCollection.setRefreshToken({
         refreshToken: newRefreshToken,
       });
       const tweetText = await tweetsCollection.getRandomText();
 
-      const { data: createdTweet } = await refreshedClient.v2.tweet(tweetText);
-      response.json(createdTweet);
+      // 短い期間で同じツイートをするとエラーになるため、Date.now() で必ず異なるテキストになるようにしている
+      const { data: createdTweet } = await refreshedClient.v2.tweet(
+        tweetText + ' ' + Date.now()
+      );
+      functions.logger.log(createdTweet);
     } catch (error) {
-      console.log('error', error);
-      response.status(403).send(JSON.stringify(error));
+      functions.logger.error(error);
     }
-  }
-);
+  });

@@ -30,16 +30,14 @@ export class OAuthCollection {
     return data;
   }
 
-  async setAccessTokenAndRefreshToken(
-    data: DocTypeForRefreshToken
-  ): Promise<WriteResult> {
+  async setRefreshToken(data: DocTypeForRefreshToken): Promise<WriteResult> {
     const path = `${this.collectionName}/${this.docIdMap.refreshToken}`;
     const result = await this.db.doc(path).set(data);
 
     return result;
   }
 
-  async getAccessTokenAndRefreshToken(): Promise<DocTypeForRefreshToken> {
+  async getRefreshToken(): Promise<DocTypeForRefreshToken> {
     const path = `${this.collectionName}/${this.docIdMap.refreshToken}`;
     const snapshot = await this.db.doc(path).get();
     const data = snapshot.data() as DocTypeForRefreshToken;
