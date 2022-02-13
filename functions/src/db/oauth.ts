@@ -1,14 +1,14 @@
 import { Firestore, WriteResult } from 'firebase-admin/firestore';
 import {
   DocTypeForCodeVerifierAndState,
-  DocTypeForAccessTokenAndRefreshToken,
+  DocTypeForRefreshToken,
 } from '../types/index';
 
 export class OAuthCollection {
   private readonly collectionName = 'oauth';
   private readonly docIdMap = {
     codeVerifierAndState: 'codeVerifierAndState',
-    accessTokenAndRefreshToken: 'accessTokenAndRefreshToken',
+    refreshToken: 'refreshToken',
   };
 
   constructor(private readonly db: Firestore) {}
@@ -31,18 +31,18 @@ export class OAuthCollection {
   }
 
   async setAccessTokenAndRefreshToken(
-    data: DocTypeForAccessTokenAndRefreshToken
+    data: DocTypeForRefreshToken
   ): Promise<WriteResult> {
-    const path = `${this.collectionName}/${this.docIdMap.accessTokenAndRefreshToken}`;
+    const path = `${this.collectionName}/${this.docIdMap.refreshToken}`;
     const result = await this.db.doc(path).set(data);
 
     return result;
   }
 
-  async getAccessTokenAndRefreshToken(): Promise<DocTypeForAccessTokenAndRefreshToken> {
-    const path = `${this.collectionName}/${this.docIdMap.accessTokenAndRefreshToken}`;
+  async getAccessTokenAndRefreshToken(): Promise<DocTypeForRefreshToken> {
+    const path = `${this.collectionName}/${this.docIdMap.refreshToken}`;
     const snapshot = await this.db.doc(path).get();
-    const data = snapshot.data() as DocTypeForAccessTokenAndRefreshToken;
+    const data = snapshot.data() as DocTypeForRefreshToken;
 
     return data;
   }

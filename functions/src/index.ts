@@ -56,15 +56,14 @@ export const twitterAuthCallback = functions.https.onRequest(
     const client = new TwitterApi({ clientId, clientSecret });
 
     try {
-      const { accessToken, refreshToken } = await client.loginWithOAuth2({
+      const { refreshToken } = await client.loginWithOAuth2({
         code,
         codeVerifier,
         redirectUri: callbackUrl,
       });
 
       await oauthCollection.setAccessTokenAndRefreshToken({
-        accessToken,
-        refreshToken: refreshToken as string,
+        refreshToken,
       });
 
       response.send('OK');
@@ -83,14 +82,14 @@ export const tweet = functions.https.onRequest(
     try {
       const { refreshToken } =
         await oauthCollection.getAccessTokenAndRefreshToken();
-      const {
-        client: refreshedClient,
-        accessToken,
-        refreshToken: newRefreshToken,
-      } = await client.refreshOAuth2Token(refreshToken);
+      if (!refreshToken) {
+        throw new Error('No refreshToken found.');
+      }
+
+      const { client: refreshedClient, refreshToken: newRefreshToken } =
+        await client.refreshOAuth2Token(refreshToken);
       await oauthCollection.setAccessTokenAndRefreshToken({
-        accessToken,
-        refreshToken: newRefreshToken as string,
+        refreshToken: newRefreshToken,
       });
       const { data: createdTweet } = await refreshedClient.v2.tweet(
         'test : ' + Date.now()

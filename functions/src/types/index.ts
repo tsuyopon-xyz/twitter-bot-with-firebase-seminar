@@ -15,7 +15,6 @@ export type DocTypeForCodeVerifierAndState = {
   state: string;
 };
 
-export type DocTypeForAccessTokenAndRefreshToken = {
-  accessToken: string;
-  refreshToken: string;
+export type DocTypeForRefreshToken = {
+  refreshToken?: string;
 };
