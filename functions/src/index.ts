@@ -73,3 +73,32 @@ export const twitterAuthCallback = functions.https.onRequest(
     }
   }
 );
+
+export const tweet = functions.https.onRequest(
+  async (_, response): Promise<void> => {
+    const { twitter } = getConfig();
+    const { clientId, clientSecret } = twitter;
+    const client = new TwitterApi({ clientId, clientSecret });
+
+    try {
+      const { refreshToken } =
+        await oauthCollection.getAccessTokenAndRefreshToken();
+      const {
+        client: refreshedClient,
+        accessToken,
+        refreshToken: newRefreshToken,
+      } = await client.refreshOAuth2Token(refreshToken);
+      await oauthCollection.setAccessTokenAndRefreshToken({
+        accessToken,
+        refreshToken: newRefreshToken as string,
+      });
+      const { data: createdTweet } = await refreshedClient.v2.tweet(
+        'test : ' + Date.now()
+      );
+      response.json(createdTweet);
+    } catch (error) {
+      console.log('error', error);
+      response.status(403).json(error);
+    }
+  }
+);
