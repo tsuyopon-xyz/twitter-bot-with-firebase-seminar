@@ -12,6 +12,14 @@ const tweetsCollection = new TweetsCollection(db);
 
 export const twitterAuthRedirect = functions.https.onRequest(
   async (_, response): Promise<void> => {
+    // トークンの更新処理を本番でも行ってしまうと、
+    // 知らない誰かにトークン情報を上書きされてしまう可能性があるため、
+    // 「twitterAuthRedirect」は開発時しか利用できないようにする
+    if (process.env.NODE_ENV === 'production') {
+      response.status(404).send('Not Found');
+      return;
+    }
+
     const { twitter } = getConfig();
     const { clientId, clientSecret, callbackUrl, scope } = twitter;
 
@@ -38,6 +46,14 @@ export const twitterAuthRedirect = functions.https.onRequest(
 
 export const twitterAuthCallback = functions.https.onRequest(
   async (request, response): Promise<void> => {
+    // トークンの更新処理を本番でも行ってしまうと、
+    // 知らない誰かにトークン情報を上書きされてしまう可能性があるため、
+    // 「twitterAuthRedirect」は開発時しか利用できないようにする
+    if (process.env.NODE_ENV === 'production') {
+      response.status(404).send('Not Found');
+      return;
+    }
+
     const { state, code } = request.query as { state: string; code: string };
     const { codeVerifier, state: stateInFirestore } =
       await oauthCollection.getCodeVerifierAndState();
