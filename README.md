@@ -24,30 +24,54 @@ https://tsuyoshi.notion.site/6dd508e63b2a4c70b21a486bae535ec0
 
 [解説資料受け取りフォーム](https://automation001.jp/p/r/Zksi5egk)
 
+
+**■追加コンテンツ（2022年2月16日）**
+
+解説動画を4本追加しました。
+
+最初の1本目は一般公開しているので、「とりあえず最初の動画を観たい」という方は以下からご覧ください。
+
+https://youtu.be/N9HGD8ahklg
+
+
+残り3本の動画は限定公開で、テキスト資料と一緒にお受け取りいただけます。
+
+
+
 ### 解説ページの目次をスクショしたもの
 
 どんな解説資料が受け取れるのか、解説資料の目次部分をスクリーンショットしたものを以下に貼っておきます。
 
-#### ページの全体像
+・1. ページの全体像
 
 ![画像1](./docs/images/twitter-bot-seminar-page-1.png)
 
-#### Twitter API を利用する下準備
+---
+
+・2. Twitter API を利用する下準備
 
 ![画像2](./docs/images/twitter-bot-seminar-page-2.png)
 
-#### Twitter bot 用の Firebase プロジェクトを作る
+---
+
+・3. Twitter bot 用の Firebase プロジェクトを作る
 
 ![画像3](./docs/images/twitter-bot-seminar-page-3.png)
 
-#### トークン取得用の関数を実装する（Cloud Functions）
+---
+
+・4. トークン取得用の関数を実装する（Cloud Functions）
 
 ![画像4](./docs/images/twitter-bot-seminar-page-4.png)
 
-#### ツイートを行う関数を実装する
+---
+
+・5. ツイートを行う関数を実装する
 
 ![画像5](./docs/images/twitter-bot-seminar-page-5.png)
 
-#### 自動ツイートを定期実行する
+---
+
+・6. 自動ツイートを定期実行する
 
 ![画像6](./docs/images/twitter-bot-seminar-page-6.png)
