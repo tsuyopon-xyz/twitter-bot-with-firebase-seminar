@@ -25,7 +25,9 @@ https://tsuyoshi.notion.site/6dd508e63b2a4c70b21a486bae535ec0
 [解説資料受け取りフォーム](https://automation001.jp/p/r/Zksi5egk)
 
 
-**■追加コンテンツ（2022年2月16日）**
+---
+
+**■追加コンテンツ（2022年2月16日に追加）**
 
 解説動画を4本追加しました。
 
@@ -34,9 +36,12 @@ https://tsuyoshi.notion.site/6dd508e63b2a4c70b21a486bae535ec0
 https://youtu.be/N9HGD8ahklg
 
 
+[![IMAGE ALT TEXT HERE](https://img.youtube.com/vi/N9HGD8ahklg/0.jpg)](https://www.youtube.com/watch?v=N9HGD8ahklg)
+
+
 残り3本の動画は限定公開で、テキスト資料と一緒にお受け取りいただけます。
 
-
+---
 
 ### 解説ページの目次をスクショしたもの
 
